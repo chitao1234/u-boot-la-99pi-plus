@@ -1,0 +1,320 @@
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/dts-v1/;
+/ {
+	model = "loongson-2k0300";
+	compatible = "loongson,loongson3";
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	aliases {
+		spi0 = &spi0;
+		serial0 = &uart0;
+		ethernet0 = &gmac0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon";
+	};
+
+    memory {
+    name = "memory";
+    device_type = "memory";
+    reg = <0x90000000 0x00000000 0 0x10000000
+           0x90000000 0x90000000 0 0x30000000>;
+		  bootph-all;
+    };
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		bootparam: bootparam_region {
+			reg = <0x90000000 0x0f000000 0x0 0x1000000>;
+			no-map;
+		};
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu-map {
+			cluster0 {
+				core0 {
+					cpu = <&cpu0>;
+				};
+			};
+		};
+
+		cpu0: cpu@10000 {
+			device_type = "cpu";
+			compatible = "loongarch";
+			reg=<0>;
+			numa-node-id = <0>;
+		};
+
+	};
+
+	cpuic: interrupt-controller {
+		compatible = "loongson,cpu-interrupt-controller";
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+
+	liointc0: interrupt-controller@16001400 {
+		compatible = "loongson,liointc-2.0";
+		reg = <0 0x16001400 0 0x40>,
+		      <0 0x16001040 0 0x8>;
+		reg-names = "main", "isr0";
+
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		interrupt-parent = <&cpuic>;
+		interrupts = <2>;
+		interrupt-names = "int0";
+
+		loongson,parent_int_map = <0xffffffff>, /* int0 */
+					<0x00000000>, /* int1 */
+					<0x00000000>, /* int2 */
+					<0x00000000>; /* int3 */
+	};
+
+	liointc1: interrupt-controller@16001440 {
+		compatible = "loongson,liointc-2.0";
+		reg = <0 0x16001440 0 0x40>,
+		      <0 0x16001048 0 0x8>;
+		reg-names = "main", "isr0";
+
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		interrupt-parent = <&cpuic>;
+		interrupts = <4>;
+		interrupt-names = "int2";
+
+		loongson,parent_int_map = <0x00000000>, /* int0 */
+					<0x00000000>, /* int1 */
+					<0xffffffff>, /* int2 */
+					<0x00000000>; /* int3 */
+	};
+
+	ram@0 {
+        compatible = "loongson,ls2k0300-ddr";
+        bootph-all;
+        soc-config-reg = <0x16000100>;
+        mc-disable-offs = <5>;
+        mc-default-offs = <1>;
+	};
+
+	pinmux: pinmux@0x16000490 {
+		compatible = "pinctrl-single";
+		reg = <0x80000000 0x16000490 0 0x20>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		#pinctrl-cells = <2>;
+		pinctrl-single,bit-per-mux;
+		pinctrl-single,register-width = <32>;
+		pinctrl-single,function-mask = <0xf>;
+		// dc0
+		dc_pins: pinmux_G0_G32_as_gmac {
+			pinctrl-single,bits = <0x0 0xffffffff 0xffffffff 
+						0x4 0x00ffffff 0x00ffffff>;
+		};
+		//gmac
+		gmac0_pins: pinmux_gmac0_pins {
+			pinctrl-single,bits = <0x4 0xff000000 0xff000000
+								   0x8 0x0000ffff 0x0000ffff>;
+		};
+        //sdio
+        sdio0_pins: pinmux_sdio0_pins {
+            pinctrl-single,bits = <0x14 0xfff00000 0xfff0f000
+                                   0x18 0x000000ff 0x000000ff>;
+        };
+
+	};
+
+	soc {
+		compatible = "ls,nbus", "simple-bus";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges = <0 0x10000000 0 0x10000000 0 0x10000000
+			0 0x2000000  0 0x2000000  0 0x2000000
+			0 0x20000000 0 0x20000000 0 0x10000000
+			0 0x40000000 0 0x40000000 0 0x40000000>;
+		bootph-all;
+
+		wdt: syscon@16124000 {
+			compatible = "syscon";
+			reg = <0 0x16124000 0 0x000c>;
+		};
+
+		reboot {
+			compatible = "syscon-reboot";
+			regmap = <&wdt>;
+			offset = <0x00>;
+			mask = <0x1>;
+		};
+
+		gpio:gpio@0x16104000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			compatible = "loongson,ls-gpio";
+			reg = <0 0x16104000 0 0x4000>;
+
+			gpio0: bank@0 {
+				reg = <0>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				ngpios = <106>;
+				bytewise;
+				conf_offset = <0x800>;
+				out_offset = <0x900>;
+				in_offset = <0xa00>;
+			};
+		};
+		uart0: serial@0x16100000 {
+			compatible = "ns16550a";
+			reg = <0 0x16100000 0 0x10>;
+			clock-frequency = <100000000>;
+			interrupt-parent = <&liointc0>;
+			interrupts = <0 IRQ_TYPE_LEVEL_HIGH>;
+			no-loopback-test;
+			bootph-all;
+		};
+
+		gmac0: ethernet@0x16020000 {
+			compatible = "snps,dwmac-3.70a", "snps,arc-dwmac-3.70a";
+			reg = <0x0 0x16020000 0 0x10000>;
+			interrupt-parent = <&liointc1>;
+			interrupts = <17 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "macirq";
+			pinctrl-0 = <&gmac0_pins>;
+			pinctrl-names = "default";
+			phy-mode = "rgmii";
+			bus_id = <0x0>;
+			phy_addr = <0xffffffff>;
+			dma-mask = <0xffffffff 0xffffffff>;
+            phy-handle = <&eth_phy0>;
+			snps,reset-active-low;
+			snps,reset-gpio = <&gpio0 87 GPIO_ACTIVE_HIGH>;
+			snps,reset-delays-us = <0 10000 50000>;
+
+            mdio0: mdio@0 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                compatible = "snps,dwmac-mdio";
+                eth_phy0: ethernet-phy@0 {
+                              reg = <0>;
+                          };
+                   };
+        };
+
+
+		spi0: spi0@0x16010000 {
+			compatible = "loongson,ls-spi";
+			reg = <0x0 0x16010000 0 0x40000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			clock-frequency = <100000000>;
+			bootph-all;
+
+            spi-flash@0 {
+                compatible = "jedec,spi-nor";
+                spi-max-frequency = <25000000>; /* input clock */
+                reg = <0>; /* CS0 */
+            };
+        };
+
+		emmc0: emmc@0x16140000 {
+			compatible = "loongson,ls-mmc";
+			reg = <0 0x16140000 0 0x8000>;
+			interrupt-parent = <&liointc0>;
+			interrupts = <31 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-0 = <&sdio0_pins>;
+			pinctrl-names = "default";
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+		};
+
+		ehci@0x16080000 {
+			compatible = "generic-ehci";
+			reg = <0 0x16080000 0 0x8000>;
+			dma-mask = <0x0 0xffffffff>;
+		};
+
+		ohci@0x16088000 {
+			compatible = "generic-ohci";
+			reg = <0 0x16088000 0 0x8000>;
+			dma-mask = <0x0 0xffffffff>;
+		};
+
+		dc: dc@0x16090000 {
+			compatible = "loongson,ls-dc", "simple-bus";
+			reg = <	0 0x16090000 0 0xffff		/* DC register base */
+					0 0x16000410 0 0x4			/* pix pll config0 addr */
+					0 0x16000414 0 0x4			/* pix pll config1 addr */
+					/* 0 0xd000000 0 0x2000000 */ >; 	/* framebuffer addr */
+
+			pinctrl-0 = <&dc_pins>;
+			pinctrl-names = "default";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			bootph-all;
+
+			dvo0: dvo@0 {
+				compatible = "loongson,ls-dc-dvo";
+				reg = <0>;
+				clock-frequency = <120000000>;
+				connector-type = "panel";   // panel, vga, hdmi
+				connector = <&panel_rgb>;
+			};
+
+		};
+
+		panel_rgb: panel-rgb {
+			compatible = "simple-panel";
+			backlight = <&panel_bkl>;
+			pix-fmt = "rgb888"; // rgb444, rgb555, rgb565, rgb888
+
+			display-timings {
+				native-mode = <&timing0>;
+				timing0: 1024x600 {
+					clock-frequency = <51200000>;
+					hactive = <1024>;
+					vactive = <600>;
+					hsync-len = <20>;
+					hfront-porch = <160>;
+					hback-porch = <140>;
+					vfront-porch = <12>;
+					vback-porch = <20>;
+					vsync-len = <3>;
+					de-active = <1>;
+					hsync-active = <0>;
+					vsync-active = <0>;
+					pixelclk-active = <0>;
+				};
+			};
+		};
+
+		panel_bkl: backlight {
+			compatible = "gpio-backlight";
+			gpios = <&gpio0 86 GPIO_ACTIVE_HIGH>;
+			// default-on;
+		};
+	};
+	sysinfo-smbios {
+		compatible = "u-boot,sysinfo-smbios";
+		bootph-all;
+
+		smbios {
+			system {
+				manufacturer = "Loongson";
+				product = "LS2K0300";
+			};
+		};
+	};
+};

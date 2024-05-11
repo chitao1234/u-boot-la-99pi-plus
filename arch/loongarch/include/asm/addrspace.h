@@ -1,0 +1,36 @@
+#ifndef __ASM_LA_ADDRSPACE_H
+#define __ASM_LA_ADDRSPACE_H
+
+#define CACHED_MEMORY_ADDR		0x9000000000000000
+#define UNCACHED_MEMORY_ADDR		0x8000000000000000
+#define IS_CACHED_ADDR(x)		(!!(((x) & 0xff00000000000000ULL) == CACHED_MEMORY_ADDR))
+#define TO_PHYS_MASK			(0xFFFFFFFFFFFF)
+
+#ifndef __ASSEMBLY__
+#define VA_TO_PHYS(x)			((unsigned long long)(x) & TO_PHYS_MASK)
+#define	PHYS_TO_CACHED(x)		(CACHED_MEMORY_ADDR | VA_TO_PHYS(x))
+#define	PHYS_TO_UNCACHED(x) 		(UNCACHED_MEMORY_ADDR | VA_TO_PHYS(x))
+#else
+#define VA_TO_PHYS(x)			((x) & TO_PHYS_MASK)
+#define	PHYS_TO_CACHED(x)		(CACHED_MEMORY_ADDR | (x))
+#define	PHYS_TO_UNCACHED(x) 		(UNCACHED_MEMORY_ADDR | (x))
+#endif
+
+#define CACHED_TO_PHYS(x)		VA_TO_PHYS(x)
+#define UNCACHED_TO_PHYS(x)		VA_TO_PHYS(x)
+#define	CACHED_TO_UNCACHED(x)		(PHYS_TO_UNCACHED(x))
+#define UNCACHED_TO_CACHED(x)		(PHYS_TO_CACHED(x))
+
+#define BOOT_SPACE_BASE			(0x1c000000)
+#define BOOT_SPACE_SIZE			(SZ_1M)
+
+#define BOOT_SPACE_BASE_UNCACHED	PHYS_TO_UNCACHED(BOOT_SPACE_BASE)
+#define BOOT_SPACE_BASE_CACHED		PHYS_TO_CACHED(BOOT_SPACE_BASE)
+
+// 如果用 PHYS_TO_CACHED 会在configs/loongson_common.h mach-loongson/spl.c 编译报错
+#define LOCK_CACHE_BASE			(CACHED_MEMORY_ADDR | (HIGH_MEM_ENTRY_ADDR + SZ_256M))
+#define LOCK_CACHE_SIZE			(SZ_256K)
+
+#include <mach/addrspace.h>
+
+#endif /* __ASM_LA_ADDRSPACE_H */

@@ -1,0 +1,1 @@
+obj-$(CONFIG_SOC_LS2K0300) += ls2k0300.o

@@ -1,0 +1,1 @@
+obj-y	+= bdinfo.o bdi_eeprom.o bdi_sf.o

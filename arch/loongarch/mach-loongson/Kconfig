@@ -1,0 +1,72 @@
+menu "Loongson setup"
+choice
+	prompt "Loongson soc family select"
+	depends on ARCH_LA_LOONGSON
+
+config SOC_LS2K0300
+	bool "Support for LS2K0300 family SoCs"
+	depends on SUPPORTS_CPU_LOONGARCH64
+	select LOONGARCH_L1_CACHE_SHIFT_6
+
+endchoice
+
+choice
+	prompt "CPU freq select"
+	depends on ARCH_LA_LOONGSON
+
+config CPU_500MHZ
+	bool "500MHz"
+
+config CPU_600MHZ
+	bool "600MHz"
+
+config CPU_700MHZ
+	bool "700MHz"
+
+config CPU_800MHZ
+	bool "800MHz"
+	depends on SOC_LS2K0300
+
+config CPU_900MHZ
+	bool "900MHz"
+	depends on SOC_LS2K0300
+
+config CPU_1000MHZ
+	bool "1000MHz"
+	depends on SOC_LS2K0300
+
+config CPU_1100MHZ
+	bool "1100MHz"
+	depends on SOC_LS2K0300
+endchoice
+
+choice
+	prompt "Board select"
+	default TARGET_LS2K0300 if SOC_LS2K0300
+config TARGET_LS2K0300
+	bool "LS2K0300 Board"
+	depends on SOC_LS2K0300
+	help
+	  This supports Loongson 2K0300 board.
+
+endchoice
+
+config SYS_CPU
+	default "LA264" if SOC_LS2K0300
+
+config SYS_SOC
+	default "ls2k0300" if SOC_LS2K0300
+
+config CPU_FREQ
+	int
+	default 500 if CPU_500MHZ
+	default 600 if CPU_600MHZ
+	default 700 if CPU_700MHZ
+	default 800 if CPU_800MHZ
+	default 900 if CPU_900MHZ
+	default 1000 if CPU_1000MHZ
+	default 1100 if CPU_1100MHZ
+
+source "board/loongson/Kconfig"
+
+endmenu

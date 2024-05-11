@@ -1,0 +1,19 @@
+config MACH_LOONGSON
+	bool
+	default y if ARCH_LA_LOONGSON
+	select LAST_STAGE_INIT
+	select SPL_BOARD_INIT if SPL
+
+config SYS_VENDOR
+	default "loongson"
+
+if SOC_LS2K0300
+config SYS_BOARD
+	default "ls2k0300"
+
+config SYS_CONFIG_NAME
+	default "loongson_2k0300"
+
+endif
+
+source "board/loongson/common/Kconfig"
