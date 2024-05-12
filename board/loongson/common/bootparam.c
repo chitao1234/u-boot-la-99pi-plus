@@ -156,6 +156,22 @@ void loongson_acpi_init(void)
 }
 #endif
 
+void loongson_fdt_init(void)
+{
+	const efi_guid_t fdt_guid = EFI_FDT_GUID;
+	void *fdt = env_get("fdt_addr");
+	if (fdt) {
+		fdt = (void *)simple_strtoul(fdt, NULL, 16);
+		if (fdt_check_header(fdt)) {
+			printf("Warning: invalid device tree. Used linux default dtb\n");
+			fdt = NULL;
+		}
+	}
+	if (fdt)
+		efi_install_configuration_table(&fdt_guid,
+						(void *)fdt);
+}
+
 int init_boot_param(struct boot_params *bp)
 {
 	u64 __maybe_unused tab_offset = sizeof(struct boot_params);
@@ -184,6 +200,7 @@ int init_boot_param(struct boot_params *bp)
 #ifdef ACPI_SUPPORT
 	loongson_acpi_init();
 #endif
+	loongson_fdt_init();
 	return 0;
 }
 

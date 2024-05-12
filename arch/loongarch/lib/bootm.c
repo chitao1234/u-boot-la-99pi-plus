@@ -263,7 +263,7 @@ static void boot_jump_linux(struct bootm_headers *images)
 	kernel_entry_t kernel = (kernel_entry_t)map_to_sysmem((void*)images->ep);
 #if defined(CONFIG_LOONGSON_BOOT_FIXUP)
 	void *fw_arg2 = NULL, *fw_arg3 = NULL;
-	void *fdt = NULL, *bootparam = NULL;
+	void *bootparam = NULL;
 #endif
 
 	debug("## Transferring control to Linux (at address %p) ...\n", kernel);
@@ -278,20 +278,12 @@ static void boot_jump_linux(struct bootm_headers *images)
 #endif
 
 #if defined(CONFIG_LOONGSON_BOOT_FIXUP)
-	fdt = env_get("fdt_addr");
-	if (fdt) {
-		fdt = (void *)simple_strtoul(fdt, NULL, 16);
-		if (fdt_check_header(fdt)) {
-			printf("Warning: invalid device tree. Used linux default dtb\n");
-			fdt = NULL;
-		}
-	}
 
 	bootparam = build_boot_param();
-	fw_arg2 = bootparam;
-	fw_arg3 = fdt;
+	fw_arg2 = *(unsigned long long *)(bootparam + 8);
+	fw_arg3 = 0;
 
-	kernel(linux_argc, (ulong)linux_argv, (ulong)fw_arg2,
+	kernel(0, (ulong)env_get("bootargs"), (ulong)fw_arg2,
 			(ulong)fw_arg3);
 #else
 	if (images->ft_len) {
