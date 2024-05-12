@@ -76,7 +76,7 @@
 
 /* video configuration */
 // #define DISPLAY_BANNER_ON_VIDCONSOLE
-
+#define CFG_SYS_SDRAM_BASE 0x9000000000000000
 #define DBG_ASM
 
 #endif /* __LOONGSON_LA_COMMON_H__ */
