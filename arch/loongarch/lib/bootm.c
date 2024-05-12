@@ -53,166 +53,6 @@ void arch_lmb_reserve(struct lmb *lmb)
 	lmb_reserve(lmb, sp, gd->ram_top - sp);
 }
 
-static void linux_cmdline_init(void)
-{
-	linux_argc = 1;
-	linux_argv = (char **)map_sysmem(gd->bd->bi_boot_params, 0);
-	linux_argv[0] = 0;
-	linux_argp = (char *)(linux_argv + LINUX_MAX_ARGS);
-}
-
-static void linux_cmdline_set(const char *value, size_t len)
-{
-	linux_argv[linux_argc] = linux_argp;
-	memcpy(linux_argp, value, len);
-	linux_argp[len] = 0;
-
-	linux_argp += len + 1;
-	linux_argc++;
-}
-
-static void linux_cmdline_dump(void)
-{
-	int i;
-
-	debug("## cmdline argv at 0x%p, argp at 0x%p\n",
-	      linux_argv, linux_argp);
-
-	for (i = 1; i < linux_argc; i++)
-		debug("   arg %03d: %s\n", i, linux_argv[i]);
-}
-
-static void linux_cmdline_legacy(struct bootm_headers *images)
-{
-	const char *bootargs, *next, *quote;
-
-	linux_cmdline_init();
-
-	bootargs = env_get("bootargs");
-	if (!bootargs)
-		return;
-
-	next = bootargs;
-
-	while (bootargs && *bootargs && linux_argc < LINUX_MAX_ARGS) {
-		quote = strchr(bootargs, '"');
-		next = strchr(bootargs, ' ');
-
-		while (next && quote && quote < next) {
-			/*
-			 * we found a left quote before the next blank
-			 * now we have to find the matching right quote
-			 */
-			next = strchr(quote + 1, '"');
-			if (next) {
-				quote = strchr(next + 1, '"');
-				next = strchr(next + 1, ' ');
-			}
-		}
-
-		if (!next)
-			next = bootargs + strlen(bootargs);
-
-		linux_cmdline_set(bootargs, next - bootargs);
-
-		if (*next)
-			next++;
-
-		bootargs = next;
-	}
-}
-
-// static void linux_cmdline_append(struct bootm_headers *images)
-// {
-// 	char buf[24];
-// 	ulong mem, rd_start, rd_size;
-
-// 	/* append mem */
-// 	mem = gd->ram_size >> 20;
-// 	sprintf(buf, "mem=%luM", mem);
-// 	linux_cmdline_set(buf, strlen(buf));
-
-// 	/* append rd_start and rd_size */
-// 	rd_start = images->initrd_start;
-// 	rd_size = images->initrd_end - images->initrd_start;
-
-// 	if (rd_size) {
-// 		sprintf(buf, "rd_start=0x%08lX", rd_start);
-// 		linux_cmdline_set(buf, strlen(buf));
-// 		sprintf(buf, "rd_size=0x%lX", rd_size);
-// 		linux_cmdline_set(buf, strlen(buf));
-// 	}
-// }
-
-static void linux_env_init(void)
-{
-	linux_env = (char **)(((ulong) linux_argp + 15) & ~15);
-	linux_env[0] = 0;
-	linux_env_p = (char *)(linux_env + LINUX_MAX_ENVS);
-	linux_env_idx = 0;
-}
-
-static void linux_env_set(const char *env_name, const char *env_val)
-{
-	if (linux_env_idx < LINUX_MAX_ENVS - 1) {
-		linux_env[linux_env_idx] = linux_env_p;
-
-		strcpy(linux_env_p, env_name);
-		linux_env_p += strlen(env_name);
-		*linux_env_p++ = '=';
-
-		strcpy(linux_env_p, env_val);
-		linux_env_p += strlen(env_val);
-
-		linux_env_p++;
-		linux_env[++linux_env_idx] = 0;
-	}
-}
-
-static void linux_env_legacy(struct bootm_headers *images)
-{
-	char env_buf[12];
-	const char *cp;
-	ulong rd_start, rd_size;
-
-	if (CONFIG_IS_ENABLED(MEMSIZE_IN_BYTES)) {
-		sprintf(env_buf, "%lu", (ulong)gd->ram_size);
-		debug("## Giving linux memsize in bytes, %lu\n",
-		      (ulong)gd->ram_size);
-	} else {
-		sprintf(env_buf, "%lu", (ulong)(gd->ram_size >> 20));
-		debug("## Giving linux memsize in MB, %lu\n",
-		      (ulong)(gd->ram_size >> 20));
-	}
-
-	rd_start = (ulong)map_sysmem(images->initrd_start, 0);
-	rd_size = images->initrd_end - images->initrd_start;
-
-	linux_env_init();
-
-	linux_env_set("memsize", env_buf);
-
-	sprintf(env_buf, "0x%08lX", rd_start);
-	linux_env_set("initrd_start", env_buf);
-
-	sprintf(env_buf, "0x%lX", rd_size);
-	linux_env_set("initrd_size", env_buf);
-
-	sprintf(env_buf, "0x%08X", (uint) (gd->bd->bi_flashstart));
-	linux_env_set("flash_start", env_buf);
-
-	sprintf(env_buf, "0x%X", (uint) (gd->bd->bi_flashsize));
-	linux_env_set("flash_size", env_buf);
-
-	cp = env_get("ethaddr");
-	if (cp)
-		linux_env_set("ethaddr", cp);
-
-	cp = env_get("eth1addr");
-	if (cp)
-		linux_env_set("eth1addr", cp);
-}
-
 static int boot_reloc_fdt(struct bootm_headers *images)
 {
 	/*
@@ -241,19 +81,25 @@ static int boot_setup_fdt(struct bootm_headers *images)
 	//	&images->lmb);
 	return image_setup_libfdt(images, images->ft_addr, &images->lmb);
 }
-
+static char *linux_command_line;
 static void boot_prep_linux(struct bootm_headers *images)
 {
+	char *bootargs = env_get("bootargs");
+	linux_command_line = bootargs;
 	if (images->ft_len) {
 		boot_reloc_fdt(images);
 		boot_setup_fdt(images);
 	} else {
-#ifdef CONFIG_LOONGARCH_BOOT_CMDLINE_LEGACY
-			linux_cmdline_legacy(images);
-			// linux_cmdline_append(images);
-			linux_cmdline_dump();
-			linux_env_legacy(images);
-#endif
+		long rd_start, rd_size;
+		if (images->initrd_start) {
+			rd_start = images->initrd_start;
+			rd_size = images->initrd_end - images->initrd_start;
+			linux_command_line = malloc((bootargs ? strlen(bootargs) : 0) + 64);
+			if (bootargs)
+				sprintf(linux_command_line, "%s rd_start=0x%016llX rd_size=0x%lX", bootargs, (long long)(long)rd_start, rd_size);
+			else
+				sprintf(linux_command_line, "rd_start=0x%016llX rd_size=0x%lX", (long long)(long)rd_start, rd_size);
+		}
 	}
 }
 
@@ -283,7 +129,7 @@ static void boot_jump_linux(struct bootm_headers *images)
 	fw_arg2 = *(unsigned long long *)(bootparam + 8);
 	fw_arg3 = 0;
 
-	kernel(0, (ulong)env_get("bootargs"), (ulong)fw_arg2,
+	kernel(0, (ulong)linux_command_line, (ulong)fw_arg2,
 			(ulong)fw_arg3);
 #else
 	if (images->ft_len) {
