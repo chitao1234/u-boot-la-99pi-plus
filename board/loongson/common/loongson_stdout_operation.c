@@ -85,7 +85,7 @@ void set_stdout(int type, int status)
 {
 	char serial_env[] = "serial";
 #ifdef CONFIG_VIDEO
-	char video_env[] = "vidconsole,vidconsole1";
+	char video_env[] = "vidconsole";
 	char* handle_env_set[] = {serial_env, video_env};
 #else
 	char* handle_env_set[] = {serial_env};

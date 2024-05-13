@@ -55,8 +55,8 @@
 #define CONSOLE_STDOUT_SETTINGS \
 	"splashimage=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
 	"stdin=serial,"STDIN_GPIOBTN",usbkbd\0" \
-	"stdout=serial\0" \
-	"stderr=serial,vidconsole,vidconsole1\0"
+	"stdout=serial,vidconsole\0" \
+	"stderr=serial,vidconsole\0"
 #else
 #define CONSOLE_STDOUT_SETTINGS \
 	"stdin=serial,"STDIN_GPIOBTN"\0" \
