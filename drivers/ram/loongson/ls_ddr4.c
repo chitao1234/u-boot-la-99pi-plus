@@ -112,7 +112,7 @@ void mm_feature_init(void)
 	mm_ctrl_info.table.enable_bit_training		= 0;
 	mm_ctrl_info.table.disable_dimm_ecc		= 1;
 #else
-	mm_ctrl_info.table.ddr_param_store		= 0;
+	mm_ctrl_info.table.ddr_param_store		= 1;
 	mm_ctrl_info.table.ddr3_dimm			= 0;
 	mm_ctrl_info.table.enable_mc_vref_training	= 1;
 	mm_ctrl_info.table.enable_ddr_vref_training	= 1;
