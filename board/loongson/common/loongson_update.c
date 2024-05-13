@@ -522,12 +522,12 @@ static int do_loongson_update(struct cmd_tbl *cmdtp, int flag, int argc, char * 
 		ret = update_kernel(dev, argv[3], argv[4]);
 		break;
 	case UPDATE_TYPE_ROOTFS:
-		ret = update_rootfs(dev, NULL);
+		ret = update_rootfs(dev, argv[3]);
 		break;
 	case UPDATE_TYPE_ALL:
 		// ret = update_dtb(dev);
 		ret = update_kernel(dev, argv[3], argv[4]);
-		ret = update_rootfs(dev, NULL);
+		ret = update_rootfs(dev, argv[3]);
 		ret = update_uboot(dev);
 		break;
 	default:
