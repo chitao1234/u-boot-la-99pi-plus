@@ -478,6 +478,10 @@ static int ls_ddr_probe(struct udevice *dev)
 	}
 
 #if defined(CONFIG_SPL_BUILD) || !defined(CONFIG_SPL)
+	/* ddr soft rst */
+	readl(L2XBAR_CONFIG_BASE_ADDR + 0x11c) &= ~0x1;
+	readl(L2XBAR_CONFIG_BASE_ADDR + 0x11c) |= 0x1;
+
 	mm_feature_init();
 	ddr4_init(TOT_NODE_NUM, &mm_ctrl_info);
 	// mc->mm_ctrl_info = &mm_ctrl_info;

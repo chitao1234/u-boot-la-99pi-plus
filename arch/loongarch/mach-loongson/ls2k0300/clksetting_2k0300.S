@@ -88,15 +88,32 @@ PLL LOOPC overflow
 	# TTYDBG ("\r\nDDR	:")
 
 	li.d	t0, LS_DDR_PLL_L
+	ld.w	t1, t0, 4
+	li.w	t2, ~(DDR_L2DIV_OUT_MEMDIV_MARK << DDR_L2DIV_OUT_MEMDIV_SHIFT)
+	and	t1, t1, t2
+	li.w	t2, (MEMDIV_MODE << DDR_L2DIV_OUT_MEMDIV_SHIFT)
+	or	t2, t2, t1
+	st.w	t2, t0, 0x4
+
+/*mem div reset*/
+	ld.w	t1, t0, 4
+	li.w	t2, ~(1 << 16)
+	and	t2, t1, t2
+	st.w	t2, t0, 0x4
+	li.w	t2, (1 << 16)
+	or	t2, t2, t1
+	st.w	t2, t0, 0x4
+
+	li.d	t0, LS_DDR_PLL_L
 	li.w	t1, PLL_L1_PD_PLL	//power down pll first
 	st.w	t1, t0, 0
 	li.w	t4, (DDR_DIV << DDR_L1DIV_OUT_SHIFT) | (DDR_LOOPC << DDR_L1DIV_LOOPC_SHIFT) | (DDR_REFC << DDR_L1DIV_REF_SHIFT)
 	st.w	t4, t0, 0
 
 	ld.w	t1, t0, 4
-	li.w	t2, ~((DDR_L2DIV_OUT_MEMDIV_MARK << DDR_L2DIV_OUT_MEMDIV_SHIFT) |(DDR_L2DIV_OUT_DEV_MARK << DDR_L2DIV_OUT_DEV_SHIFT) | DDR_L2DIV_OUT_NET_MARK)
+	li.w	t2, ~((DDR_L2DIV_OUT_DEV_MARK << DDR_L2DIV_OUT_DEV_SHIFT) | DDR_L2DIV_OUT_NET_MARK)
 	and	t1, t1, t2
-	li.w	t2, (MEMDIV_MODE << DDR_L2DIV_OUT_MEMDIV_SHIFT) | (DEV_DIV << DDR_L2DIV_OUT_DEV_SHIFT) | (NETWORK_DIV)
+	li.w	t2, (DEV_DIV << DDR_L2DIV_OUT_DEV_SHIFT) | (NETWORK_DIV)
 	or	t2, t2, t1
 	st.w	t2, t0, 0x4
 
