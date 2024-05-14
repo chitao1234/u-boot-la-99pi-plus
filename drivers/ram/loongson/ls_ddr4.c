@@ -103,7 +103,7 @@ void mm_feature_init(void)
 	//if you want change kernel high start address you should change the macro
 	mm_ctrl_info.mem_base = HIGH_MEM_WIN_BASE_ADDR;
 	/* mm_ctrl is global variable */
-	mm_ctrl_info.table.enable_early_printf		= 1;
+	mm_ctrl_info.table.enable_early_printf		= 0;
 #ifdef DDR3_MODE
 	mm_ctrl_info.table.ddr_param_store		= 0;
 	mm_ctrl_info.table.ddr3_dimm			= 1;
