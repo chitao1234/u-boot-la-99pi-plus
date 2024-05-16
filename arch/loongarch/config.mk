@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 #
-# (C) Copyright 2022
-# Loongson Ltd. maoxiaochuan@loongson.cn
+# (C) Copyright 2024
+# Loongson Ltd.
 
 
 32bit-emul		:= elf32loongarch
@@ -10,7 +10,13 @@
 64bit-bfd		:= elf64-loongarch
 
 ifdef CONFIG_64BIT
-PLATFORM_CPPFLAGS	+= -mabi=lp64
+ifneq ($(CONFIG_GCC_VERSION), $(firstword $(shell echo "140000 $(CONFIG_GCC_VERSION)" | tr ' ' '\n' | sort -n)))
+PLATFORM_CPPFLAGS	+= $(call cc-option, -mabi-lp64d)
+PLATFORM_CPPFLAGS	+= $(call cc-option, -fpermissive)
+PLATFORM_CPPFLAGS	+= $(call cc-option, -mno-relax)
+else
+PLATFORM_CPPFLAGS	+= $(call cc-option, -mabi-lp64)
+endif
 KBUILD_LDFLAGS		+= -m $(64bit-emul)
 OBJCOPYFLAGS		+= -O $(64bit-bfd)
 CONFIG_STANDALONE_LOAD_ADDR	?= 0x9000000080200000
