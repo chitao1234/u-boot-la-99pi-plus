@@ -21,8 +21,8 @@
 #endif
 
 /* Allow ports to override the default behavior */
-static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[]),
-				     int argc, char *const argv[])
+static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[], char * const[]
+, char * const[]),int argc, char *const argv[], char *const argv1[], char *const argv2[])
 {
 	unsigned long ret;
 
@@ -30,7 +30,7 @@ static unsigned long do_bootelf_exec(ulong (*entry)(int, char * const[]),
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args
 	 */
-	ret = entry(argc, argv);
+	ret = entry(argc, argv, argv1, argv2);
 
 	return ret;
 }
@@ -42,6 +42,10 @@ int do_bootelf(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	unsigned long rc; /* Return value from user code */
 	char *sload = NULL;
 	int rcode = 0;
+	void *fw_arg2 = NULL, *fw_arg3 = NULL;
+	void *bootparam = NULL;
+	char *bootargs = env_get("bootargs");
+	char *linux_command_line = bootargs;
 
 	/* Consume 'bootelf' */
 	argc--; argv++;
@@ -72,13 +76,17 @@ int do_bootelf(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		return rcode;
 
 	printf("## Starting application at 0x%08lx ...\n", addr);
+	
+	bootparam = build_boot_param();
+	fw_arg2 = *(unsigned long long *)(bootparam + 8);
+	fw_arg3 = 0;
 	flush();
 
 	/*
 	 * pass address parameter as argv[0] (aka command name),
 	 * and all remaining args
 	 */
-	rc = do_bootelf_exec((void *)addr, argc, argv);
+	rc = do_bootelf_exec((void *)addr, argc,(ulong)linux_command_line,(ulong)fw_arg2,(ulong)fw_arg3);
 	if (rc != 0)
 		rcode = 1;
 

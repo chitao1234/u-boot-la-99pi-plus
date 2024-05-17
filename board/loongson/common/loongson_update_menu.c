@@ -633,6 +633,8 @@ cleanup:
 
 int do_updatemenu(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
+	if(argc <= 1)
+		return 0;
 	char *return_str = NULL;
 
 	updatemenu_type = UPDATE_TYPE_UNKNOWN;
