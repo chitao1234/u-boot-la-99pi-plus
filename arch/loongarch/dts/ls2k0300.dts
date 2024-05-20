@@ -252,6 +252,12 @@
 			dma-mask = <0x0 0xffffffff>;
 		};
 
+		otg@0x16040000 {
+			compatible = "snps,dwc2";
+			reg = <0 0x16040000 0 0x8000>;
+			dma-mask = <0x0 0xffffffff>;
+		};
+
 		dc: dc@0x16090000 {
 			compatible = "loongson,ls-dc", "simple-bus";
 			reg = <	0 0x16090000 0 0xffff		/* DC register base */

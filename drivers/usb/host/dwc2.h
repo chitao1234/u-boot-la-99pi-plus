@@ -783,7 +783,7 @@ struct dwc2_core_regs {
 #endif
 
 #undef DWC2_PHY_ULPI_DDR			/* ULPI PHY uses DDR mode */
-#define DWC2_PHY_ULPI_EXT_VBUS		/* ULPI PHY controls VBUS */
+#undef DWC2_PHY_ULPI_EXT_VBUS		/* ULPI PHY controls VBUS */
 #undef DWC2_I2C_ENABLE			/* Enable I2C */
 #undef DWC2_ULPI_FS_LS			/* ULPI is FS/LS */
 #undef DWC2_TS_DLINE			/* External DLine pulsing */

@@ -403,7 +403,8 @@ static void dwc_otg_core_init(struct udevice *dev)
 	 * immediately after setting phyif.
 	 */
 	usbcfg &= ~(DWC2_GUSBCFG_ULPI_UTMI_SEL | DWC2_GUSBCFG_PHYIF);
-	usbcfg |= DWC2_PHY_TYPE << DWC2_GUSBCFG_ULPI_UTMI_SEL_OFFSET;
+	if (DWC2_PHY_TYPE == DWC2_PHY_TYPE_ULPI)
+		usbcfg |= DWC2_PHY_TYPE << DWC2_GUSBCFG_ULPI_UTMI_SEL_OFFSET;
 
 	if (usbcfg & DWC2_GUSBCFG_ULPI_UTMI_SEL) {	/* ULPI interface */
 #ifdef DWC2_PHY_ULPI_DDR
@@ -873,7 +874,7 @@ static int transfer_chunk(struct dwc2_hc_regs *hc_regs, void *aligned_buffer,
 		}
 	}
 
-	writel(phys_to_bus((unsigned long)aligned_buffer), &hc_regs->hcdma);
+	writel(phys_to_bus((PHYS_TO_UNCACHED(aligned_buffer))), &hc_regs->hcdma);
 
 	/* Clear old interrupt conditions for this host channel. */
 	writel(0x3fff, &hc_regs->hcint);
@@ -1142,14 +1143,15 @@ static int dwc2_reset(struct udevice *dev)
 
 	ret = reset_get_bulk(dev, &priv->resets);
 	if (ret) {
-		dev_warn(dev, "Can't get reset: %d\n", ret);
 		/* Return 0 if error due to !CONFIG_DM_RESET and reset
 		 * DT property is not present.
 		 */
 		if (ret == -ENOENT || ret == -ENOTSUPP)
 			return 0;
-		else
+		else {
+			dev_warn(dev, "Can't get reset: %d\n", ret);
 			return ret;
+		}
 	}
 
 	/* force reset to clear all IP register */
