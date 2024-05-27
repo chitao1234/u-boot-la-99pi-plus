@@ -165,6 +165,10 @@ start:
 	li.w	t0, 0xe
 	csrxchg t0, t0, LOONGARCH_CSR_MCSR24
 
+	/* pll setting */
+	li.d	t0, 0x0001000107270e00
+	csrwr	t0, LOONGARCH_CSR_MCSR2
+
 /*
 * set DMW0(0x180) to uncached
 * set DMW1(0x181) to cached
