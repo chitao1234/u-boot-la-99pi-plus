@@ -7,6 +7,8 @@
 #include <config.h>
 #include <stdio.h>
 #include "ls_addr4.h"
+#include <spl.h>
+#include <image.h>
 
 #ifdef DDR_DEBUG
 #define mem_debug	printf
@@ -20,7 +22,7 @@
 
 #define	DTB_SIZE 0x4000		/* 16K dtb size*/
 #define	DTB_OFFS		(NVRAM_OFFS - DTB_SIZE)
-#define DIMM_INFO_IN_FLASH_OFFS	(PHYS_TO_UNCACHED(0x1c000000) + DTB_OFFS - 0x1000)
+#define DIMM_INFO_IN_FLASH_OFFS	(PHYS_TO_UNCACHED(0x1c000000) + NVRAM_OFFS - 0x1000)
 
 #define USE_DDR_1TMODE
 #define MC_PER_NODE 		1
@@ -78,6 +80,31 @@ uint64_t get_hex(void)
 
 void mm_feature_init(void)
 {
+
+	u8 * imgaddr;
+	u8 date_u8[4],i;
+	u32 magic;
+	struct spl_image_info *spl_image;
+	size_t size = 0x40,size_offset = 12;
+	ulong payload_offs, payload_end;
+	long long dimm_info_in_flash_offs;
+	payload_offs = spl_get_uboot_offs();
+	imgaddr = map_sysmem(BOOT_SPACE_BASE + payload_offs, 0);
+	for(i = 0;i < 4; i++) {
+		date_u8[i] = *(imgaddr+i);
+	}
+	magic = (date_u8[0]<<24) | (date_u8[1]<<16) | (date_u8[2]<<8) | date_u8[3];
+	if(magic == IH_MAGIC) {
+	
+		for(i = size_offset;i < 16; i++) {
+			date_u8[i-size_offset] = *(imgaddr+i);
+		}
+		payload_end = (date_u8[0]<<24) | (date_u8[1]<<16) | (date_u8[2]<<8) | date_u8[3] + size;
+		dimm_info_in_flash_offs = 	map_sysmem(BOOT_SPACE_BASE + payload_offs + payload_end, 0);
+		dimm_info_in_flash_offs = (dimm_info_in_flash_offs & 0xfffff000) + 0x1000;
+	}
+	else
+		dimm_info_in_flash_offs = DIMM_INFO_IN_FLASH_OFFS;
 	mm_ctrl_info.mc_type = LS2K0300_MC_TYPE;
 #ifdef LOONGSON_3D5000
 	mm_ctrl_info.mc_interleave_offset = 12;
@@ -88,7 +115,7 @@ void mm_feature_init(void)
 #endif
 	mm_ctrl_info.mc_regs_base = DDR_CFG_BASE;
 	mm_ctrl_info.cache_mem_base = 0xa000000000000000;
-	mm_ctrl_info.dimm_info_in_flash_offset = DIMM_INFO_IN_FLASH_OFFS;
+	mm_ctrl_info.dimm_info_in_flash_offset = PHYS_TO_UNCACHED(dimm_info_in_flash_offs);
 	mm_ctrl_info.ddr_freq = DDR_FREQ;
 	mm_ctrl_info.ddr_freq_2slot = 400;//DDR_FREQ_2SLOT;
 	mm_ctrl_info.node_offset = 44;//NODE_OFFSET;

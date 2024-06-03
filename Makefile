@@ -1027,6 +1027,9 @@ endif
 ifeq ($(CONFIG_MACH_LOONGSON),y)
 ifeq ($(CONFIG_SPL),y)
 INPUTS-y += u-boot-with-spl.bin
+ifeq ($(CONFIG_SPL_GZIP),y)
+INPUTS-y += u-boot-spl-gz.bin
+endif
 endif
 endif
 
@@ -1485,6 +1488,16 @@ OBJCOPYFLAGS_u-boot-with-spl.bin = -I binary -O binary \
 				   --pad-to=$(CONFIG_SPL_PAD_TO)
 u-boot-with-spl.bin: $(SPL_IMAGE) $(SPL_PAYLOAD) FORCE
 	$(call if_changed,pad_cat)
+
+u-boot.img.gz:$(SPL_PAYLOAD)
+	gzip -k -v -f $<
+
+ifeq ($(CONFIG_SPL_GZIP),y)
+OBJCOPYFLAGS_u-boot-spl-gz.bin = -I binary -O binary \
+				   --pad-to=$(CONFIG_SPL_PAD_TO)
+u-boot-spl-gz.bin: $(SPL_IMAGE) u-boot.img.gz FORCE
+	$(call if_changed,pad_cat)
+endif
 
 ifeq ($(CONFIG_ARCH_LPC32XX)$(CONFIG_SPL),yy)
 MKIMAGEFLAGS_lpc32xx-spl.img = -T lpc32xximage -a $(CONFIG_SPL_TEXT_BASE)

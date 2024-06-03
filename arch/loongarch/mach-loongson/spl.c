@@ -41,7 +41,7 @@ void board_boot_order(u32 *spl_boot_list)
 #endif
 }
 
-static unsigned int spl_get_uboot_offs(void)
+unsigned int spl_get_uboot_offs(void)
 {
 	ulong spl_size, fdt_size;
 	unsigned int offs;
