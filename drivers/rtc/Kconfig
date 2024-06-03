@@ -276,6 +276,13 @@ config RTC_STM32
 	  Enable STM32 RTC driver. This driver supports the rtc that is present
 	  on some STM32 SoCs.
 
+config RTC_LS
+	bool "Enable Loongson RTC driver"
+	depends on DM_RTC
+	help
+	  Enable Loongson RTC driver. This driver supports the rtc that is present
+	  on some Loongson SoCs.
+
 config RTC_ABX80X
 	bool "Enable Abracon ABx80x RTC driver"
 	depends on DM_RTC

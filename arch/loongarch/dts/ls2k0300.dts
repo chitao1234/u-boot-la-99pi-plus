@@ -256,6 +256,7 @@
 			compatible = "snps,dwc2";
 			reg = <0 0x16040000 0 0x8000>;
 			dma-mask = <0x0 0xffffffff>;
+            status = "disable";
 		};
 
 		dc: dc@0x16090000 {
@@ -279,6 +280,15 @@
 				connector = <&panel_rgb>;
 			};
 
+		};
+
+		rtc0: rtc@16128000{
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "loongson,ls-rtc";
+			reg = <0 0x16128000 0 0x100>;
+			interrupt-parent = <&liointc1>;
+			interrupts = <8 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
 		panel_rgb: panel-rgb {
