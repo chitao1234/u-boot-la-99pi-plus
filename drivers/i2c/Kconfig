@@ -549,6 +549,24 @@ config SPL_SYS_I2C_SANDBOX
 	  bus. Devices can be attached to the bus using the device tree
 	  which specifies the driver to use.  See sandbox.dts as an example.
 
+config SYS_I2C_LOONGSON
+	bool "LoongSon I2C driver"
+	depends on  DM_I2C
+	default y
+	help
+	  Enable I2C support for loongson. This is an emulation of a real I2C
+	  bus. Devices can be attached to the bus using the device tree
+	  which specifies the driver to use.  See loongson.dts as an example.
+
+config SPL_SYS_I2C_LOONGSON
+	bool "LoongSon I2C driver (SPL)"
+	depends on SPL && DM_I2C
+	default y
+	help
+	  Enable I2C support for loongson. This is an emulation of a real I2C
+	  bus. Devices can be attached to the bus using the device tree
+	  which specifies the driver to use.  See loongson.dts as an example.
+
 config SYS_I2C_SH
 	bool "Legacy SuperH I2C interface"
 	depends on ARCH_RENESAS && SYS_I2C_LEGACY

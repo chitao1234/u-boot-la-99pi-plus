@@ -4,14 +4,15 @@
 /dts-v1/;
 / {
 	model = "loongson-2k0300";
-	compatible = "loongson,loongson3";
+	compatible = "loongson,ls2k";
 	#address-cells = <2>;
 	#size-cells = <2>;
 
 	aliases {
-		spi0 = &spi0;
 		serial0 = &uart0;
 		ethernet0 = &gmac0;
+		spi0 = &spi0;
+		i2c0 = &i2c0;
 	};
 
 	chosen {
@@ -122,6 +123,10 @@
 		dc_pins: pinmux_G0_G32_as_gmac {
 			pinctrl-single,bits = <0x0 0xffffffff 0xffffffff 
 						0x4 0x00ffffff 0x00ffffff>;
+		};
+		//i2c0
+		i2c0_pins: pinmux_i2c0_pins {
+			pinctrl-single,bits = <0xc 0x0000000f 0x0000000f>;
 		};
 		//gmac
 		gmac0_pins: pinmux_gmac0_pins {
@@ -256,7 +261,7 @@
 			compatible = "snps,dwc2";
 			reg = <0 0x16040000 0 0x8000>;
 			dma-mask = <0x0 0xffffffff>;
-            status = "disable";
+            status = "disabled";
 		};
 
 		dc: dc@0x16090000 {
@@ -280,6 +285,23 @@
 				connector = <&panel_rgb>;
 			};
 
+		};
+
+		i2c0: i2c@16108000 {
+		    compatible = "loongson,lsfs-i2c";
+		    reg = <0 0x16108000 0 0x400>;
+			pinctrl-0 = <&i2c0_pins>;
+			pinctrl-names = "default";
+		    interrupt-parent = <&liointc0>;
+		    interrupts = <4 IRQ_TYPE_LEVEL_HIGH>;
+		    #address-cells = <1>;
+		    #size-cells = <0>;
+		    clock-frequency = <100000000>;
+		    eeprom@50 {
+		        compatible = "atmel,24c64";
+		        reg = <0x50>;
+		        pagesize = <16>;
+			};
 		};
 
 		rtc0: rtc@16128000{
@@ -322,6 +344,7 @@
 			// default-on;
 		};
 	};
+
 	sysinfo-smbios {
 		compatible = "u-boot,sysinfo-smbios";
 		bootph-all;
