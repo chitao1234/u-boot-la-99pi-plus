@@ -158,7 +158,7 @@ void mm_feature_init(void)
 	mm_ctrl_info.table.disable_dq_odt_training	= 1;
 	mm_ctrl_info.table.lvl_debug			= 0;
 	mm_ctrl_info.table.disable_dram_crc		= 1;
-	mm_ctrl_info.table.two_t_mode_enable		= 0;
+	mm_ctrl_info.table.two_t_mode_enable		= 1;
 	mm_ctrl_info.table.disable_read_dbi		= 1;
 	mm_ctrl_info.table.disable_write_dbi		= 1;
 	mm_ctrl_info.table.disable_dm			= 0;
@@ -253,8 +253,8 @@ void mm_feature_init(void)
 	mm_ctrl_info.paster.mc0_bg_num			= MC0_BG_NUM;
 	mm_ctrl_info.paster.mc0_csmap			= MC0_CSMAP;
 	mm_ctrl_info.paster.mc0_dram_width		= MC0_DRAM_WIDTH;
-	mm_ctrl_info.paster.mc0_module_width		= MC0_MODULE_WIDTH;
-	mm_ctrl_info.paster.mc0_sdram_capacity		= MC0_SDRAM_CAPACITY;
+	mm_ctrl_info.paster.mc0_module_width	= MC0_MODULE_WIDTH;
+	mm_ctrl_info.paster.mc0_sdram_capacity	= MC0_SDRAM_CAPACITY;
 	mm_ctrl_info.paster.mc0_col_num			= MC0_COL_NUM;
 	mm_ctrl_info.paster.mc0_row_num			= MC0_ROW_NUM;
 	mm_ctrl_info.paster.mc0_addr_mirror		= MC0_ADDR_MIRROR;
@@ -269,8 +269,8 @@ void mm_feature_init(void)
 	mm_ctrl_info.paster.mc1_bg_num			= MC1_BG_NUM;
 	mm_ctrl_info.paster.mc1_csmap			= MC1_CSMAP;
 	mm_ctrl_info.paster.mc1_dram_width		= MC1_DRAM_WIDTH;
-	mm_ctrl_info.paster.mc1_module_width		= MC1_MODULE_WIDTH;
-	mm_ctrl_info.paster.mc1_sdram_capacity		= MC1_SDRAM_CAPACITY;
+	mm_ctrl_info.paster.mc1_module_width	= MC1_MODULE_WIDTH;
+	mm_ctrl_info.paster.mc1_sdram_capacity	= MC1_SDRAM_CAPACITY;
 	mm_ctrl_info.paster.mc1_col_num			= MC1_COL_NUM;
 	mm_ctrl_info.paster.mc1_row_num			= MC1_ROW_NUM;
 	mm_ctrl_info.paster.mc1_addr_mirror		= MC1_ADDR_MIRROR;
