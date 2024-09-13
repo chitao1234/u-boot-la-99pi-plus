@@ -10,7 +10,8 @@
 64bit-bfd		:= elf64-loongarch
 
 ifdef CONFIG_64BIT
-ifneq ($(CONFIG_GCC_VERSION), $(firstword $(shell echo "140000 $(CONFIG_GCC_VERSION)" | tr ' ' '\n' | sort -n)))
+ifneq ($(CONFIG_GCC_VERSION), $(firstword $(shell echo "130000 $(CONFIG_GCC_VERSION)" | tr ' ' '\n' | sort -n)))
+PLATFORM_CPPFLAGS       += -Wa,-mno-relax -fno-asynchronous-unwind-tables
 PLATFORM_CPPFLAGS	+= $(call cc-option, -mabi-lp64d)
 PLATFORM_CPPFLAGS	+= $(call cc-option, -fpermissive)
 PLATFORM_CPPFLAGS	+= $(call cc-option, -mno-relax)
@@ -37,4 +38,4 @@ PLATFORM_RELFLAGS		+= -ffunction-sections -fdata-sections
 LDFLAGS_FINAL			+= --gc-sections
 LDFLAGS_STANDALONE		+= --gc-sections
 
-LDFLAGS_u-boot += --gc-sections -static -pie
+LDFLAGS_u-boot += --gc-sections -static -pic

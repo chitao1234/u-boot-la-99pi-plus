@@ -36,6 +36,15 @@ ENTRY(lowlevel_init)
 # 	ld.bu	t2, t0, 0x6
 # 	bne	t2, t1, spi_quad_io
 # #endif
+	
+	/*close usb & ddr soft reset: [0] ddr, [7] usbm*/
+	li.w  	t1, 0xffffff7e 
+	st.w 	t1, t0, 0x1c
+
+	/*unvalid ddr soft reset: [0] ddr*/
+	ld.w	t1, t0, 0x1c
+	ori     t1, t1, 0x1
+	st.w 	t1, t0, 0x1c
 
 	/*[103:96] en [111:104] coherent*/
 	/*0:cpu    1:usb     2:gmac0    3:gmac1   4:dc   

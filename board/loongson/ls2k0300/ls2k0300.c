@@ -26,8 +26,9 @@ static void ls2k0300_usb_phy_init(unsigned long long base, int sel)
 	unsigned int val;
 	int i;
 
-	readl(base + 0x508) &= ~(1 << 3);
 	readl(base + 0x11c) &= ~(1 << (8 + sel));
+	readl(base + 0x11c) |=  (1 <<  7);
+	readl(base + 0x508) &= ~(1 << 3);
 
 	if (sel) {
 		readl(base + 0x508) |= (1 << 16) | (1 << 17);
