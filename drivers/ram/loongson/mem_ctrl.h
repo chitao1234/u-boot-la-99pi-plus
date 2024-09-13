@@ -409,7 +409,7 @@ extern param_debug param_info[];
 #define MC0_ENABLE 1
 #define MC1_ENABLE 0
 
-#define	MC0_MEMSIZE        512
+#define	MC0_MEMSIZE        1024
 #define	MC0_DRAM_TYPE      DDR4
 #define	MC0_DIMM_TYPE      0
 #define	MC0_MODULE_TYPE	   2
@@ -421,7 +421,7 @@ extern param_debug param_info[];
 #define	MC0_MODULE_WIDTH   1
 #define	MC0_SDRAM_CAPACITY 0
 #define	MC0_COL_NUM        2
-#define	MC0_ROW_NUM        3
+#define	MC0_ROW_NUM        2
 #define	MC0_ADDR_MIRROR    0
 #define	MC0_BG_MIRROR      0
 
